@@ -1,7 +1,15 @@
 puppet-alternatives
 ===================
 
-Manage debian alternatives symlinks.
+Manage Debian alternatives symlinks.
+This module is based on the module by Adrien Thebo (adrien@puppetlabs.com)
+Added support for Red Hat Linux and derivatives.
+
+The Red Hat version also has a type 'alternative' that supports
+adding/removing individual alternative paths and optional slave links.
+
+This module should work on any Debian or Red Hat based distribution, or really any
+distribution that has a reasonable `update-alternatives` file.
 
 Synopsis
 --------
@@ -67,14 +75,51 @@ Using the alternatives resource in a manifest:
 
 - - -
 
-This module should work on any Debian based distribution, or really any
-distribution that has a reasonable `update-alternatives` file.
+
+Managing individual paths with the `alternative` type
+-----------------------------------------------------
+This type handles individual entries in a file in /var/lib</dpkg>/alternatives.
+If you create an alternative for which there is no such file yet, it will be automatically created.
+If you remove the last alternative in a file, the file is automatically deleted.
+
+The title of this resource is composite: <name>:<path> where name is a generic name of the alternative
+(e.g. 'editor') and path is an actual file on the file system (e.g. '/usr/bin/vim')
+The link attribute is normally /usr/bin/<name> (this is the default value)
+The default value for priority is '10'
+
+After making modifications using this resource, it is possible that the alternative changes
+to manual mode. If this is not what you want, you can change it back to auto mode using the
+alternatives resource.
+
+- - - 
+
+Examples:
+
+    alternative { 'test2:/usr/bin/vmstat':
+      ensure   => present,
+      link     => '/usr/bin/test2',
+      priority => '2',
+    }
+
+    alternative { 'editor:/usr/bin/vim':
+      ensure   => present,
+    }
+
+- - - 
+
+With slave links: ( = hash or array of hashes)
+
+    alternative { 'editor:/usr/bin/vim':
+      ensure => present,
+      slave  => [{name => "t1", link => "/usr/bin/t1", path => "/usr/bin/xyz"},
+                 ...
+                ],
+    }
+
+- - - 
 
 Contact
 -------
 
-  * Source code: https://github.com/adrienthebo/puppet-alternatives
-  * Issue tracker: https://github.com/adrienthebo/puppet-alternatives/issues
-
-If you have questions or concerns about this module, contact finch on #puppet
-on Freenode, or email adrien@puppetlabs.com.
+  * Source code: https://github.com/cegeka/puppet-alternatives
+  * Issue tracker: https://github.com/cegeka/puppet-alternatives/issues
