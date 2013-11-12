@@ -1,4 +1,8 @@
-
+# This type handles an alternative configuration (= file in /var/lib/alternatives)
+# - List configured default programs
+# - Manually select an alternative (which puts the alternative configuration in manual mode)
+# - Change back to auto mode
+#
 Puppet::Type.type(:alternatives).provide(:rhel) do
 
   defaultfor :osfamily => :redhat
@@ -56,8 +60,8 @@ Puppet::Type.type(:alternatives).provide(:rhel) do
     update('--auto', @resource.value(:name))
   end
 
-  def self.fetch_path(masterlink)
-    output = update('--display', masterlink)
+  def self.fetch_path(alternative_name)
+    output = update('--display', alternative_name)
     output_array = output.split("\n")
     output_array.shift
     first = output_array.first
@@ -65,12 +69,12 @@ Puppet::Type.type(:alternatives).provide(:rhel) do
     if first =~ /link currently points to (.*)$/
       $1
     else
-      raise Puppet::Error, "Could not determine path for #{masterlink}"
+      raise Puppet::Error, "Could not determine path for #{alternative_name}"
     end
   end
 
-  def self.fetch_mode(masterlink)
-    output = update('--display', masterlink)
+  def self.fetch_mode(alternative_name)
+    output = update('--display', alternative_name)
     first = output.split("\n").first
 
     if first.include? "auto"
@@ -78,7 +82,7 @@ Puppet::Type.type(:alternatives).provide(:rhel) do
     elsif first.include? "manual"
       'manual'
     else
-      raise Puppet::Error, "Could not determine if #{masterlink} is in auto or manual mode"
+      raise Puppet::Error, "Could not determine if #{alternative_name} is in auto or manual mode"
     end
   end
 end
