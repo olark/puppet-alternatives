@@ -1,0 +1,3 @@
+fixtures:
+  symlinks:
+    "alternatives": "#{source_dir}"
